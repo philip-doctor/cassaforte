@@ -26,7 +26,7 @@
             [qbits.hayt.cql :as hayt])
   (:import [com.datastax.driver.core Statement ResultSet ResultSetFuture Host Session Cluster
             Cluster$Builder SimpleStatement PreparedStatement HostDistance PoolingOptions
-            SSLOptions ProtocolOptions$Compression]
+            SSLOptions JdkSSLOptions ProtocolOptions$Compression ProtocolVersion]
            [com.datastax.driver.auth DseAuthProvider]
            [com.google.common.util.concurrent Futures FutureCallback]
            java.net.URI
@@ -76,7 +76,7 @@
            kerberos
            protocol-version
            compression]
-    :or {protocol-version 2}}]
+    :or {protocol-version 4}}]
   (when force-prepared-queries
     (alter-var-root (var hayt/*prepared-statement*)
                     (constantly true)))
@@ -88,7 +88,7 @@
     (when port
       (.withPort builder port))
     (when protocol-version
-      (.withProtocolVersion builder protocol-version))
+      (.withProtocolVersion builder (ProtocolVersion/fromInt protocol-version)))
     (when credentials
       (.withCredentials builder (:username credentials) (:password credentials)))
     (when connections-per-host
@@ -126,12 +126,16 @@
         password (char-array keystore-password)
         ssl-cipher-suites (if cipher-suites
                             (into-array String cipher-suites)
-                            SSLOptions/DEFAULT_SSL_CIPHER_SUITES)]
+                            ;; v3.0 of the drivers dropped SSLOptions.DEFAULT_SSL_CIPHER_SUITES so we'll just re-use
+                            ;; the literal here.
+                            { "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA" })]
     (.load keystore keystore-stream password)
     (.init keymanager keystore password)
     (.init trustmanager keystore)
     (.init ssl-context (.getKeyManagers keymanager) (.getTrustManagers trustmanager) nil)
-    (SSLOptions. ssl-context ssl-cipher-suites)))
+    (-> (JdkSSLOptions/builder)
+        (.withSSLContext ssl-context)
+        (.withCipherSuites ssl-cipher-suites))))
 
 (defn- ^ProtocolOptions$Compression select-compression
   [compression]

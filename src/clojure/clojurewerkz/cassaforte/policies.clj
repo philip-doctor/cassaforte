@@ -36,7 +36,9 @@
    Like round-robin but over the nodes located in the same datacenter.
    Nodes from other datacenters will be tried only if all requests to local nodes fail."
   [^String local-dc]
-  (DCAwareRoundRobinPolicy. local-dc))
+  (-> (DCAwareRoundRobinPolicy/builder)
+      (.withLocalDc local-dc)
+      (.build)))
 
 (defn token-aware-policy
   "Takes a load balancing policy and makes it token-aware"
