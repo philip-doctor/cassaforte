@@ -269,26 +269,26 @@
 ;;
 
 (defn describe-keyspace
-  "Returns a keyspace description, taken from `system.schema_keyspaces`."
+  "Returns a keyspace description, taken from `system_schema.keyspaces`."
   [^Session session ks]
   (first
-   (select session :system.schema_keyspaces
+   (select session :system_schema.keyspaces
            (q/where {:keyspace_name (name ks)}))))
 
 (defn describe-table
-  "Returns a table description, taken from `system.schema_columnfamilies`."
+  "Returns a table description, taken from `system_schema.columnfamilies`."
   [^Session session ks table]
   (first
-   (select session :system.schema_columnfamilies
+   (select session :system_schema.tables
            (q/where {:keyspace_name (name ks)
-                     :columnfamily_name (name table)}))))
+                     :table_name (name table)}))))
 
 (defn describe-columns
-  "Returns table columns description, taken from `system.schema_columns`."
+  "Returns table columns description, taken from `system_schema.columns`."
   [^Session session ks table]
-  (select session :system.schema_columns
+  (select session :system_schema.columns
           (q/where {:keyspace_name (name ks)
-                    :columnfamily_name (name table)})))
+                    :table_name (name table)})))
 
 ;;
 ;; Higher-level collection manipulation
