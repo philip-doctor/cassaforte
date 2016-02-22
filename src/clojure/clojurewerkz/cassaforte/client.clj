@@ -116,7 +116,7 @@
       (.withAuthProvider builder (DseAuthProvider.)))
     (.build builder)))
 
-(defn- ^SSLOptions build-ssl-options
+(defn- ^JdkSSLOptions build-ssl-options
   [{:keys [keystore-path keystore-password cipher-suites]}]
   (let [keystore-stream (io/input-stream keystore-path)
         keystore (KeyStore/getInstance "JKS")
