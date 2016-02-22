@@ -128,7 +128,7 @@
                             (into-array String cipher-suites)
                             ;; v3.0 of the drivers dropped SSLOptions.DEFAULT_SSL_CIPHER_SUITES so we'll just re-use
                             ;; the literal here.
-                            { "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA" })]
+                            (into-array String ["TLS_RSA_WITH_AES_128_CBC_SHA" "TLS_RSA_WITH_AES_256_CBC_SHA"]))]
     (.load keystore keystore-stream password)
     (.init keymanager keystore password)
     (.init trustmanager keystore)
